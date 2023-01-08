@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 #
 # BakeBit example for the basic functions of BakeBit 128x64 OLED (http://wiki.friendlyarm.com/wiki/index.php/BakeBit_-_OLED_128x64)
@@ -163,7 +164,7 @@ def draw_page():
     x = 0
     y = 0
     # Move left to right keeping track of the current x position for drawing shapes.
-    if int(time.strftime("%M")) % 6 < 3:  # oled shifts every 3 minutes
+    if int(time.strftime("%M"))  < 30 :  # oled shifts 
         x = 2
         y = 2
 
