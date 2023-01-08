@@ -163,7 +163,7 @@ def draw_page():
     x = 0
     y = 0
     # Move left to right keeping track of the current x position for drawing shapes.
-    if int(time.strftime("%M")) % 6 < 0:  # oled shifts every 3 minutes
+    if int(time.strftime("%M")) % 6 < 3:  # oled shifts every 3 minutes
         x = 2
         y = 2
 
