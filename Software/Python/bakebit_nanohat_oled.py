@@ -65,15 +65,16 @@ last_index = 0
 global options
 options = "Options"
 global optionA
-optionA = "Shutdown?"
+optionA = "Shutdown"
 global optionB
-optionB = "Reboot?"
+optionB = "Reboot"
 global statue
 statue = "not available"
 
 oled.init()  # initialze SEEED OLED display
 oled.setNormalDisplay()  # Set display to normal mode (i.e non-inverse mode)
 oled.setHorizontalMode()
+oled.setBrightness(100)  # Set default brightness to 100, max is 255
 
 global drawing
 drawing = False
@@ -164,7 +165,7 @@ def draw_page():
     x = 0
     y = 0
     # Move left to right keeping track of the current x position for drawing shapes.
-    if int(time.strftime("%M"))  < 30 :  # oled shifts 
+    if int(time.strftime("%M")) < 30:  # oled shifts
         x = 2
         y = 2
 
@@ -244,6 +245,19 @@ def is_showing_power_msgbox():
     return False
 
 
+def disable_display():
+    oled.clearDisplay()
+    oled.setBrightness(0)
+    oled.sendCommand(oled.SeeedOLED_Display_Off_Cmd)  # display off
+
+
+def active_display():
+    global last_index
+    oled.sendCommand(oled.SeeedOLED_Display_On_Cmd)  # display on
+    oled.setBrightness(100)  # Set default brightness to 100, max is 255
+    update_page_index(last_index)
+
+
 def option_status(st):
     global options, optionA, optionB, statue
     if st == "shutdown":
@@ -256,11 +270,21 @@ def option_status(st):
         optionA = "Yes"
         optionB = "No"
         statue = "rebooting"
+    elif st == "option2":
+        options = "Options"
+        optionA = "Reboot"
+        optionB = "Display Off"
+        statue = "option2"
+    elif st == "Disable":
+        options = "NAN"
+        optionA = "NAN"
+        optionB = "NAN"
+        statue = "NAN"
     else:
         options = "Options"
         optionA = "Shutdown"
         optionB = "Reboot"
-        statue = "not available"
+        statue = "option"
 
 
 def update_page_index(pi):
@@ -289,11 +313,22 @@ def receive_signal(signum, stack):
 
     if signum == signal.SIGUSR1:
         print('K1 pressed')
+        if (statue == "NAN"):
+            active_display()
+            option_status("default")
+            update_page_index(1)
         if is_showing_power_msgbox():
             if page_index == 3:
                 update_page_index(4)
             else:
-                update_page_index(3)
+                if statue == "option":
+                    option_status("option2")
+                    update_page_index(4)
+                elif statue == "option2":
+                    option_status("option")
+                    update_page_index(3)
+                else:
+                    update_page_index(3)
             draw_page()
         else:
             pageIndex = 0
@@ -302,20 +337,27 @@ def receive_signal(signum, stack):
 
     if signum == signal.SIGUSR2:
         print('K2 pressed')
+        if (statue == "NAN"):
+            active_display()
+            option_status("default")
+            update_page_index(1)
         if is_showing_power_msgbox():
             if page_index == 3:
-                if options == "Options":
+                if statue == "option":
                     option_status("shutdown")
                     update_page_index(4)
-                elif options == "Shutdown?":
+                elif statue == "shutting down":
                     update_page_index(5)
-                elif options == "Reboot?":
+                elif statue == "rebooting":
                     update_page_index(5)
             else:
-                if options == "Options":
+                if statue == "option2":
+                    option_status("Disable")
+                    disable_display()
+                elif statue == "option":
                     option_status("reboot")
                     update_page_index(4)
-                elif options == "Shutdown?" or options == "Reboot?":
+                elif statue == "shutting down" or statue == "rebooting":
                     option_status("default")
                     pageIndex = last_index
             draw_page()
@@ -327,6 +369,10 @@ def receive_signal(signum, stack):
 
     if signum == signal.SIGALRM:
         print('K3 pressed')
+        if (statue == "NAN"):
+            active_display()
+            option_status("default")
+            update_page_index(1)
         if is_showing_power_msgbox():
             option_status("default")
             update_page_index(last_index)
