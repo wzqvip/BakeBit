@@ -74,7 +74,6 @@ statue = "not available"
 oled.init()  # initialze SEEED OLED display
 oled.setNormalDisplay()  # Set display to normal mode (i.e non-inverse mode)
 oled.setHorizontalMode()
-oled.setBrightness(100)  # Set default brightness to 100, max is 255
 
 global drawing
 drawing = False
@@ -244,16 +243,13 @@ def is_showing_power_msgbox():
         return True
     return False
 
-
 def disable_display():
-    oled.clearDisplay()
-    oled.setBrightness(0)
+    draw.rectangle((0, 0, width, height), outline=0, fill=0)
     oled.sendCommand(oled.SeeedOLED_Display_Off_Cmd)  # display off
 
 def active_display():
     global last_index, statue
     oled.sendCommand(oled.SeeedOLED_Display_On_Cmd)  # display on
-    oled.setBrightness(100)  # Set default brightness to 100, max is 255
     option_status("Default")
     update_page_index(1)
 
