@@ -250,13 +250,12 @@ def disable_display():
     oled.setBrightness(0)
     oled.sendCommand(oled.SeeedOLED_Display_Off_Cmd)  # display off
 
-
 def active_display():
-    global last_index
+    global last_index, statue
     oled.sendCommand(oled.SeeedOLED_Display_On_Cmd)  # display on
     oled.setBrightness(100)  # Set default brightness to 100, max is 255
-    update_page_index(last_index)
-
+    option_status("Default")
+    update_page_index(1)
 
 def option_status(st):
     global options, optionA, optionB, statue
@@ -276,9 +275,9 @@ def option_status(st):
         optionB = "Display Off"
         statue = "option2"
     elif st == "Disable":
-        options = "NAN"
-        optionA = "NAN"
-        optionB = "NAN"
+        options = "Waking up"
+        optionA = ""
+        optionB = ""
         statue = "NAN"
     else:
         options = "Options"
@@ -317,7 +316,7 @@ def receive_signal(signum, stack):
             active_display()
             option_status("default")
             update_page_index(1)
-        if is_showing_power_msgbox():
+        elif is_showing_power_msgbox():
             if page_index == 3:
                 update_page_index(4)
             else:
@@ -341,7 +340,7 @@ def receive_signal(signum, stack):
             active_display()
             option_status("default")
             update_page_index(1)
-        if is_showing_power_msgbox():
+        elif is_showing_power_msgbox():
             if page_index == 3:
                 if statue == "option":
                     option_status("shutdown")
@@ -373,7 +372,7 @@ def receive_signal(signum, stack):
             active_display()
             option_status("default")
             update_page_index(1)
-        if is_showing_power_msgbox():
+        elif is_showing_power_msgbox():
             option_status("default")
             update_page_index(last_index)
             draw_page()
